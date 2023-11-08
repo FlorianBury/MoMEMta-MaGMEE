@@ -43,6 +43,3 @@ namespace %(namespace)s {
 
 }
 
-// Register matrix element with MoMEMta
-#include <momemta/MatrixElementFactory.h>
-REGISTER_MATRIX_ELEMENT("%(namespace)s_%(process_class)s", %(namespace)s::%(process_class)s);

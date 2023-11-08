@@ -1,22 +1,22 @@
-    class %(process_class)s: public momemta::MatrixElement 
+    class %(process_class)s
     {
         public:
     
             // Constructor & destructor
             %(process_class)s(const ParameterSet& configuration);
-            virtual ~%(process_class)s() {};
+            ~%(process_class)s() {};
     
             // Calculate flavour-independent parts of cross section.
-            virtual momemta::MatrixElement::Result compute(
+            momemta::MatrixElement::Result compute(
                 const std::pair < std::vector<double>, std::vector<double> > &initialMomenta, 
                 const std::vector < std::pair < int, std::vector<double> > > &finalState);
     
-            virtual std::shared_ptr<momemta::MEParameters> getParameters() {
+            std::shared_ptr<momemta::MEParameters> getParameters() {
                 return params;
             }
 
             // Make sure all helicity combinations are tried again (forget optimisation consisting of not evaluating helicities which have given a zero result once)
-            virtual void resetHelicities();
+            void resetHelicities();
 
         private:
     
