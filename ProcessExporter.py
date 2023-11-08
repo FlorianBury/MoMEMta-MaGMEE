@@ -35,7 +35,7 @@ from madgraph import MadGraph5Error, MG5DIR
 from madgraph.iolibs.export_cpp import UFOModelConverterCPP
 from madgraph.iolibs.export_v4 import VirtualExporter
 
-_file_path = os.path.join(MG5DIR, "PLUGIN", "MoMEMta-MaGMEE")
+_file_path = os.path.join(MG5DIR, "PLUGIN", "MoMEMta-MaGMEE-standalone")
 _template_dir = os.path.join(_file_path, "Template")
 logger = logging.getLogger('madgraph.export_pythia8')
 
