@@ -33,7 +33,9 @@ find_package(MoMEMta CONFIG REQUIRED)
 # Fortran code:
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable -std=c++11 -O3 -fcx-fortran-rules -fcx-limited-range")
 
-file(GLOB_RECURSE SOURCES "*.cc")
+file(GLOB_RECURSE SOURCES
+        ${PROJECT_SOURCE_DIR}/src/*.cc
+        ${PROJECT_SOURCE_DIR}/SubProcesses/*/*.cc)
 
 include_directories("include")
 %(include_subprocs_list)s

@@ -54,6 +54,7 @@ class OneProcessExporterMoMEMta:
     process_wavefunction_template      = 'wavefunctions.inc'
     process_matrix_averaging_template  = 'matrix_averaging.inc'
     single_process_template            = 'matrix.inc'
+    eval_tempate_cc                    = 'evaluate.cc'
 
     class OneProcessExporterMoMEMtaError(Exception):
         pass
@@ -191,7 +192,6 @@ class OneProcessExporterMoMEMta:
 
         logger.info('Created files %(process)s.h and %(process)s.cc in %(dir)s' % \
                     {'process': self.process_class, 'dir': self.path})
-
 
 
     #===========================================================================
@@ -652,6 +652,7 @@ class ProcessExporterMoMEMta(VirtualExporter):
         src (for model and ALOHA source files)
         lib (with compiled libraries from src)
         SubProcesses (with makefile and Pxxxxx directories)
+        standalone (with script and makefile to evaluate the ME)
         """
 
         self.model = model
@@ -700,6 +701,11 @@ class ProcessExporterMoMEMta(VirtualExporter):
 
         try:
             os.mkdir('SubProcesses')
+        except os.error as error:
+            logger.warning(error.strerror + " " + self.dir_path)
+
+        try:
+            os.mkdir('standalone')
         except os.error as error:
             logger.warning(error.strerror + " " + self.dir_path)
 
@@ -775,14 +781,33 @@ class ProcessExporterMoMEMta(VirtualExporter):
         model_builder.write_files()
 
     def finalize(self, matrix_element, cmdhistory, MG5options, outputflag):
+        # Write the standalone scripts (one per process file)
+        for sub_dir in self.sub_dirs:
+            process = os.path.basename(sub_dir)
+            replace_dict = {
+                'process_class' : process,
+                'namespace'     : self.dir_name + "_" + self.model_name,
+                'card'          : os.path.join(self.dir_path,'Cards','param','param_card.dat'),
+            }
+            evalfile = OneProcessExporterMoMEMta.read_template_file((_template_dir,'evaluate.cc')) % replace_dict
+            with open(os.path.join(self.dir_path, 'standalone', 'evaluate_%s.cc'%process), 'w') as m_file:
+                m_file.write(evalfile)
+
         # Copy CMakeLists.txt and fill template
         include_commands = "\n".join( [ 'include_directories("SubProcesses/{}")'.format(os.path.basename(dir)) for dir in self.sub_dirs ] )
-        makefile = OneProcessExporterMoMEMta.read_template_file((_template_dir, 'CMakeLists.txt')) % {
+        makefile = OneProcessExporterMoMEMta.read_template_file((_template_dir, 'CMakeLists.txt'))
+        makefile = makefile% {
                 'dir_name': self.dir_name,
                 'include_subprocs_list': include_commands
                 }
+
+        # Add the executables to the CMakeList
+        for sub_dir in self.sub_dirs:
+            makefile += '\nadd_executable({evaluate} "standalone/{evaluate}.cc")\ntarget_link_libraries({evaluate} me_{dir})\nset_target_properties({evaluate} PROPERTIES OUTPUT_NAME\n  "{evaluate}.exe")\n'.format(evaluate='evaluate_%s'%os.path.basename(sub_dir),dir=self.dir_name)
+
         with open(os.path.join(self.dir_path, 'CMakeLists.txt'), 'w') as m_file:
             m_file.write(makefile)
+
 
     def modify_grouping(self, matrix_element):
         return False, matrix_element
