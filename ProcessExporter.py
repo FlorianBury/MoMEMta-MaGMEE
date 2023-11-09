@@ -787,7 +787,7 @@ class ProcessExporterMoMEMta(VirtualExporter):
             replace_dict = {
                 'process_class' : process,
                 'namespace'     : self.dir_name + "_" + self.model_name,
-                'card'          : os.path.join(self.dir_path,'Cards','param','param_card.dat'),
+                'card'          : os.path.join(self.dir_path,'Cards','param_card.dat'),
             }
             evalfile = OneProcessExporterMoMEMta.read_template_file((_template_dir,'evaluate.cc')) % replace_dict
             with open(os.path.join(self.dir_path, 'standalone', 'evaluate_%s.cc'%process), 'w') as m_file:
